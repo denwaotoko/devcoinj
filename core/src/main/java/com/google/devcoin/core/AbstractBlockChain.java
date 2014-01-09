@@ -246,7 +246,7 @@ public abstract class AbstractBlockChain {
             } catch (BlockStoreException e1) {
                 throw new RuntimeException(e1);
             }
-            throw new VerificationException("Could not verify block " + block.getHashAsString() + "\n" +
+            throw new VerificationException("Could not verify block (add(Block block))" + block.getHashAsString() + "\n" +
                     block.toString(), e);
         }
     }
@@ -275,7 +275,7 @@ public abstract class AbstractBlockChain {
             } catch (BlockStoreException e1) {
                 throw new RuntimeException(e1);
             }
-            throw new VerificationException("Could not verify block " + block.getHash().toString() + "\n" +
+            throw new VerificationException("Could not verify block (add(FilteredBlock block))" + block.getHash().toString() + "\n" +
                     block.toString(), e);
         }
     }
@@ -319,6 +319,7 @@ public abstract class AbstractBlockChain {
         lock.lock();
         try {
             // TODO: Use read/write locks to ensure that during chain download properties are still low latency.
+            System.out.println("Entered private boolean add - TEST OUTPUT");
             if (System.currentTimeMillis() - statsLastTime > 1000) {
                 // More than a second passed since last stats logging.
                 if (statsBlocksAdded > 1)
@@ -832,7 +833,7 @@ public abstract class AbstractBlockChain {
             timespan = targetTimespan / 4;
         if (timespan > targetTimespan * 4)
             timespan = targetTimespan * 4;
-
+		
         BigInteger newDifficulty = Utils.decodeCompactBits(prev.getDifficultyTarget());
         newDifficulty = newDifficulty.multiply(BigInteger.valueOf(timespan));
         newDifficulty = newDifficulty.divide(BigInteger.valueOf(targetTimespan));

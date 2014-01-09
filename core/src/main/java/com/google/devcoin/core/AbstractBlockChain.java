@@ -795,8 +795,15 @@ public abstract class AbstractBlockChain {
         checkState(lock.isHeldByCurrentThread());
         Block prev = storedPrev.getHeader();
         
+        int targetTimespan = params.getTargetTimespan();
+        if  (storedPrev.getHeight()+1 < 10700){
+			System.out.println("Block is still below 10700"); //This should make it atleast sync until Block 10700, not get stuck at 143...
+			targetTimespan *= 14;
+		}
+		long interval = targetTimespan / 600;
+
         // Is this supposed to be a difficulty transition point?
-        if ((storedPrev.getHeight() + 1) % (params.getInterval()*14) != 0) { //Important if Intervals change!!
+        if ((storedPrev.getHeight() + 1) % interval != 0) { //Important if Intervals change!!
 
             // TODO: Refactor this hack after 0.5 is released and we stop supporting deserialization compatibility.
             // This should be a method of the NetworkParameters, which should in turn be using singletons and a subclass
@@ -813,13 +820,11 @@ public abstract class AbstractBlockChain {
                         Long.toHexString(prev.getDifficultyTarget()));
             return;
         }
-			
-
         // We need to find a block far back in the chain. It's OK that this is expensive because it only occurs every
         // two weeks after the initial block chain download.
         long now = System.currentTimeMillis();
         StoredBlock cursor = blockStore.get(prev.getHash());
-        for (int i = 0; i < params.getInterval() - 1; i++) {
+        for (int i = 0; i < interval - 1; i++) {
             if (cursor == null) {
                 // This should never happen. If it does, it means we are following an incorrect or busted chain.
                 throw new VerificationException(
@@ -834,13 +839,12 @@ public abstract class AbstractBlockChain {
         Block blockIntervalAgo = cursor.getHeader();
         int timespan = (int) (prev.getTimeSeconds() - blockIntervalAgo.getTimeSeconds());
         // Limit the adjustment step.
-        int targetTimespan = params.getTargetTimespan();
         System.out.println(storedPrev.getHeight());
         
         
 		//TESTCODE -- Quite possibly poorly converted from main.cpp...No, there's a high chance.
 		
-		long interval = targetTimespan / 600;
+		
 		long intervalMinusOne = interval-1;
 		ArrayList<Long> blockTimes = new ArrayList<Long>();
 		for (int i = 0; i < intervalMinusOne; i++){
@@ -851,11 +855,7 @@ public abstract class AbstractBlockChain {
 		//long actualTimespan = pindexLast->GetBlockTime() - pindexFirst->GetBlockTime();
 		long medianTimespan = blockTimes.get(blockTimeEndIndex) - blockTimes.get(6);
 		medianTimespan *= intervalMinusOne / (long)(blockTimeEndIndex - 6);
-		if  (storedPrev.getHeight()+1 < 10700){
-			log.info("Block is still below 10700", elapsed); //This should make it atleast sync until Block 10700, not get stuck at 143...
-			targetTimespan *= 14;
-		}
-		else if  (storedPrev.getHeight()+1 > 10800){
+		if  (storedPrev.getHeight()+1 > 10800){
 			targetTimespan = (int)medianTimespan; 
 		}
 		

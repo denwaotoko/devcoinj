@@ -26,6 +26,8 @@ import com.google.common.util.concurrent.SettableFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+
+
 import javax.annotation.Nullable;
 import java.math.BigInteger;
 import java.util.*;
@@ -319,7 +321,7 @@ public abstract class AbstractBlockChain {
         lock.lock();
         try {
             // TODO: Use read/write locks to ensure that during chain download properties are still low latency.
-            System.out.println("Entered private boolean add - TEST OUTPUT");
+            
             if (System.currentTimeMillis() - statsLastTime > 1000) {
                 // More than a second passed since last stats logging.
                 if (statsBlocksAdded > 1)
@@ -330,9 +332,11 @@ public abstract class AbstractBlockChain {
             // Quick check for duplicates to avoid an expensive check further down (in findSplit). This can happen a lot
             // when connecting orphan transactions due to the dumb brute force algorithm we use.
             if (block.equals(getChainHead().getHeader())) {
+				System.out.println("true");
                 return true;
             }
             if (tryConnecting && orphanBlocks.containsKey(block.getHash())) {
+				System.out.println("false");
                 return false;
             }
 
@@ -405,7 +409,6 @@ public abstract class AbstractBlockChain {
         boolean filtered = filteredTxHashList != null && filteredTxn != null;
         boolean fullBlock = block.transactions != null && !filtered;
         // If !filtered and !fullBlock then we have just a header.
-
         // Check that we aren't connecting a block that fails a checkpoint check
         if (!params.passesCheckpoint(storedPrev.getHeight() + 1, block.getHash()))
             throw new VerificationException("Block failed checkpoint lockin at " + (storedPrev.getHeight() + 1));
@@ -418,23 +421,31 @@ public abstract class AbstractBlockChain {
         
         StoredBlock head = getChainHead();
         if (storedPrev.equals(head)) {
+			//
+			//System.out.println("filteredTxn.size() = " + filteredTxn.size());
+			
             if (filtered && filteredTxn.size() > 0)  {
+				System.out.println("filtered");
                 log.info(format("Block %s connects to top of best chain with %d transaction(s) of which we were sent %d",
                         block.getHashAsString(), filteredTxHashList.size(), filteredTxn.size()));
                 for (Sha256Hash hash : filteredTxHashList) log.info("  matched tx {}", hash);
             }
-            if (expensiveChecks && block.getTimeSeconds() <= getMedianTimestampOfRecentBlocks(head, blockStore))
+            if (expensiveChecks && block.getTimeSeconds() <= getMedianTimestampOfRecentBlocks(head, blockStore)){
+                System.out.println("throw");
                 throw new VerificationException("Block's timestamp is too early");
-            
+            }
             // This block connects to the best known block, it is a normal continuation of the system.
             TransactionOutputChanges txOutChanges = null;
-            if (shouldVerifyTransactions())
+            if (shouldVerifyTransactions()){
+				System.out.println("shouldverify");
                 txOutChanges = connectTransactions(storedPrev.getHeight() + 1, block);
+            }
             StoredBlock newStoredBlock = addToBlockStore(storedPrev,
                     block.transactions == null ? block : block.cloneAsHeader(), txOutChanges);
             setChainHead(newStoredBlock);
             log.debug("Chain is now {} blocks high, running listeners", newStoredBlock.getHeight());
             informListenersForNewBlock(block, NewBlockType.BEST_CHAIN, filteredTxHashList, filteredTxn, newStoredBlock);
+			//System.out.println("before");
         } else {
             // This block connects to somewhere other than the top of the best known chain. We treat these differently.
             //
@@ -474,11 +485,14 @@ public abstract class AbstractBlockChain {
             // spend them until they become activated.
             if (block.transactions != null || filtered) {
                 informListenersForNewBlock(block, NewBlockType.SIDE_CHAIN, filteredTxHashList, filteredTxn, newBlock);
+				System.out.println("block.transactions != null || filtered");
             }
             
             if (haveNewBestChain)
                 handleNewBestChain(storedPrev, newBlock, block, expensiveChecks);
+                System.out.println("haveNewBestChain");
         }
+        //System.out.println("end");
     }
 
     private void informListenersForNewBlock(final Block block, final NewBlockType newBlockType,
@@ -820,13 +834,31 @@ public abstract class AbstractBlockChain {
         int timespan = (int) (prev.getTimeSeconds() - blockIntervalAgo.getTimeSeconds());
         // Limit the adjustment step.
         int targetTimespan = params.getTargetTimespan();
+        System.out.println(storedPrev.getHeight());
         
-		System.out.println(storedPrev.getHeight());
+        
+		//TESTCODE -- Quite possibly poorly converted from main.cpp...No, there's a high chance.
 		
-        if  (storedPrev.getHeight()+1 < 10700){
-			log.info("Block is still below 10700", elapsed);
+		long interval = targetTimespan / 600;
+		long intervalMinusOne = interval-1;
+		ArrayList<Long> blockTimes = new ArrayList<Long>();
+		for (int i = 0; i < intervalMinusOne; i++){
+			blockTimes.add(prev.getTimeSeconds());
+		}
+		int blockTimeEndIndex = blockTimes.size() - 6;
+		Collections.sort(blockTimes);
+		//long actualTimespan = pindexLast->GetBlockTime() - pindexFirst->GetBlockTime();
+		long medianTimespan = blockTimes.get(blockTimeEndIndex) - blockTimes.get(6);
+		medianTimespan *= intervalMinusOne / (long)(blockTimeEndIndex - 6);
+		if  (storedPrev.getHeight()+1 < 10700){
+			log.info("Block is still below 10700", elapsed); //This should make it atleast sync until Block 10700, not get stuck at 143...
 			targetTimespan *= 14;
 		}
+		else if  (storedPrev.getHeight()+1 > 10800){
+			targetTimespan = (int)medianTimespan; 
+		}
+		
+		//END OF PORT
 		
 		
         if (timespan < targetTimespan / 4)
@@ -834,7 +866,7 @@ public abstract class AbstractBlockChain {
         if (timespan > targetTimespan * 4)
             timespan = targetTimespan * 4;
 		
-        BigInteger newDifficulty = Utils.decodeCompactBits(prev.getDifficultyTarget());
+        BigInteger newDifficulty = Utils.decodeCompactBits(prev.getDifficultyTarget()); //bnNew
         newDifficulty = newDifficulty.multiply(BigInteger.valueOf(timespan));
         newDifficulty = newDifficulty.divide(BigInteger.valueOf(targetTimespan));
 

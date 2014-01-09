@@ -802,7 +802,7 @@ public abstract class AbstractBlockChain {
 		}
 		else if (storedPrev.getHeight()+1 >= 10700){
 			System.out.println("Block: " + storedPrev.getHeight()); //This should make it atleast sync until Block 10700, not get stuck at 143...
-			targetTimespan = 1;
+			targetTimespan = 600;
 		}
 		long interval = targetTimespan / 600;
 		System.out.println(interval);

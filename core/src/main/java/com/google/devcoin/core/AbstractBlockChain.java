@@ -796,11 +796,12 @@ public abstract class AbstractBlockChain {
         Block prev = storedPrev.getHeader();
         
         int targetTimespan = params.getTargetTimespan();
-        if  (storedPrev.getHeight()+1 < 10700){
-			System.out.println("Block is still below 10700"); //This should make it atleast sync until Block 10700, not get stuck at 143...
+        if  (storedPrev.getHeight() < 10700){
+			System.out.println("Block: " + storedPrev.getHeight()); //This should make it atleast sync until Block 10700, not get stuck at 143...
 			targetTimespan *= 14;
 		}
 		long interval = targetTimespan / 600;
+		System.out.println(interval);
 
         // Is this supposed to be a difficulty transition point?
         if ((storedPrev.getHeight() + 1) % interval != 0) { //Important if Intervals change!!

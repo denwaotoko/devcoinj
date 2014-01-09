@@ -796,7 +796,7 @@ public abstract class AbstractBlockChain {
         Block prev = storedPrev.getHeader();
         
         // Is this supposed to be a difficulty transition point?
-        if ((storedPrev.getHeight() + 1) % params.getInterval() != 0) {
+        if ((storedPrev.getHeight() + 1) % (params.getInterval()*14) != 0) { //Important if Intervals change!!
 
             // TODO: Refactor this hack after 0.5 is released and we stop supporting deserialization compatibility.
             // This should be a method of the NetworkParameters, which should in turn be using singletons and a subclass
@@ -813,6 +813,7 @@ public abstract class AbstractBlockChain {
                         Long.toHexString(prev.getDifficultyTarget()));
             return;
         }
+			
 
         // We need to find a block far back in the chain. It's OK that this is expensive because it only occurs every
         // two weeks after the initial block chain download.

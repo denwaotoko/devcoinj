@@ -864,7 +864,7 @@
 						blockTimes.clear();
 						//cursor = pindex??
 						int pindexFirst = storedPrev.getHeight()+1;
-						for (int i = 0; pindexFirst < intervalMinusOne && i < intervalMinusOne; i++){
+						for (int i = 0; pindexFirst != 0 && i < intervalMinusOne; i++){
 								averageBits = averageBits.add(Utils.decodeCompactBits(blockIntervalAgo.getDifficultyTarget()));
 								System.out.println("AVG BITS: " + averageBits);
 								blockTimes.addElement(blockIntervalAgo.getTimeSeconds());

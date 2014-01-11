@@ -50,11 +50,9 @@ public class MainNetParams extends NetworkParameters {
         // transactions are handled. Duplicated transactions could occur in the case where a coinbase had the same
         // extraNonce and the same outputs but appeared at different heights, and greatly complicated re-org handling.
         // Having these here simplifies block connection logic considerably.
-        //checkpoints.put(91722, new Sha256Hash("00000000000271a2dc26e7667f8419f2e15416dc6955e5a6c6cdf3f2574dd08e"));
-        //checkpoints.put(91812, new Sha256Hash("00000000000af0aed4792b1acee3d966af36cf5def14935db8de83d6f9306f2f"));
-        //checkpoints.put(91842, new Sha256Hash("00000000000a4d0a398161ffc163c503763b1f4360639393e0e4c8e300e0caec"));
-        //checkpoints.put(91880, new Sha256Hash("00000000000743f190a18c5577a3c2d2a1f610ae9601ac046a38084ccb7cd721"));
-        //checkpoints.put(200000, new Sha256Hash("000000000000034a7dedef4a161fa058a2d67a173a90155f3a2fe6fc132e0ebf"));
+        checkpoints.put(20000, new Sha256Hash("0000000000ebc9dbdf2c952ceb83025ac6b130e7be41fda37d5c29cc78fb39d5"));
+        checkpoints.put(50000, new Sha256Hash("150062ceb2a2fe00fe071a233aa4f61c9871cc9426a56718858aec583225caf2"));
+        checkpoints.put(58000, new Sha256Hash("26e388e51f144a5bdaebfbe0b56d80237647b8bba0abec82e71ce09e492c13de"));
 
         dnsSeeds = new String[] {
                 //"seed.devcoin.sipa.be",        // Pieter Wuille

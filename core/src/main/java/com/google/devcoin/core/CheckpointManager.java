@@ -79,7 +79,7 @@ public class CheckpointManager {
             DigestInputStream digestInputStream = new DigestInputStream(inputStream, digest);
             dis = new DataInputStream(digestInputStream);
             digestInputStream.on(false);
-            String magic = " 1";
+            String magic = "CHECKPOINTS 1";
             byte[] header = new byte[magic.length()];
             dis.readFully(header);
             if (!Arrays.equals(header, magic.getBytes("US-ASCII")))

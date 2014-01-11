@@ -915,7 +915,8 @@ public class Block extends Message {
         maybeParseHeader();
         return difficultyTarget;
     }
-
+	
+	
     /** Sets the difficulty target in compact form. */
     public void setDifficultyTarget(long compactForm) {
         unCacheHeader();

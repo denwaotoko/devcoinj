@@ -854,8 +854,8 @@
                     //TESTCODE -- Quite possibly poorly converted from main.cpp...No, there's a high chance.
              
             BigInteger averageBits = Utils.decodeCompactBits(0); 
-            int testDebug = storedPrev.getHeight()+1;
-            if  (storedPrev.getHeight()+1 > 10800){
+            int testDebug = storedPrev.getHeight();
+            if  (storedPrev.getHeight() > 10800){
 				try{
 						Vector<Long> blockTimes = new Vector<Long>();
 						blockTimes.clear();
@@ -873,33 +873,33 @@
 							System.out.println(blockTimes.size());
 							System.out.println(storedPrev.getHeight());
 							Enumeration vEnum = blockTimes.elements();
-							System.out.println("\nElements in vector:");
-							while(vEnum.hasMoreElements())
-							System.out.print(vEnum.nextElement() + " ");
-							System.out.println(averageBits + "\n");
+							//System.out.println("\nElements in vector:");
+							//while(vEnum.hasMoreElements())
+							//System.out.print(vEnum.nextElement() + " ");
+							//System.out.println(averageBits + "\n");
 							System.out.println(BigInteger.valueOf(intervalMinusOne));
 						}
-						else if (testDebug == 10843){
+						else if (testDebug == 10842){
 							System.out.println(blockTimes.size());
 							System.out.println(storedPrev.getHeight());
 							Enumeration vEnum2 = blockTimes.elements();
-							System.out.println("\nElements in vector:");
-							while(vEnum2.hasMoreElements())
-							System.out.print(vEnum2.nextElement() + " ");
-							System.out.println(averageBits + "\n");
+							//System.out.println("\nElements in vector:");
+							//while(vEnum2.hasMoreElements())
+							//System.out.print(vEnum2.nextElement() + " ");
+							//System.out.println(averageBits + "\n");
 							
 						}
 						
-						int blockTimeEndIndex = blockTimes.size() - 5;
-						long medianTimespan = blockTimes.get(blockTimeEndIndex) - blockTimes.get(7); //FUG
-						System.out.println(blockTimes.get(blockTimeEndIndex) + " " + blockTimes.get(7));
+						int blockTimeEndIndex = blockTimes.size() - 6;
+						long medianTimespan = blockTimes.get(blockTimeEndIndex) - blockTimes.get(6); //FUG
+						//System.out.println(blockTimes.get(blockTimeEndIndex) + " " + blockTimes.get(6));
 						//System.out.println("blockTimes.get(6)" + blockTimes.get(6));
-						System.out.println("Current mediantimepan: " + medianTimespan);
+						//System.out.println("Current mediantimepan: " + medianTimespan);
 						medianTimespan *= intervalMinusOne /((long) blockTimeEndIndex - 6);
-						System.out.println("Current mediantimepan2: " + medianTimespan);
+						//System.out.println("Current mediantimepan2: " + medianTimespan);
 						if  (testDebug > 10800){
-								targetTimespan = (int)medianTimespan;
-								System.out.println(targetTimespan);
+								timespan = (int)medianTimespan;
+								//System.out.println(targetTimespan);
 						}
 						
 				}
@@ -914,8 +914,11 @@
                 timespan = targetTimespan * 4;
                   
             BigInteger newDifficulty = Utils.decodeCompactBits(prev.getDifficultyTarget()); //bnNew.setComapct (also, pindexLast->nBits = prev.getDifficultyTarget())
-            if  (storedPrev.getHeight()+1 > 10800){
-                            newDifficulty = averageBits; //bnNew = averageBits;
+            if  (testDebug > 10800){ //10842...
+				if  (testDebug == 10801 || testDebug == 10842){
+							System.out.println(newDifficulty + " is old - vs - new is " + averageBits);
+				}
+                newDifficulty = averageBits; //bnNew = averageBits;
             }
             
             newDifficulty = newDifficulty.multiply(BigInteger.valueOf(timespan));
@@ -933,21 +936,18 @@
             // The calculated difficulty is to a higher precision than received, so reduce here.
             BigInteger mask = BigInteger.valueOf(0xFFFFFFL).shiftLeft(accuracyBytes * 8);
             newDifficulty = newDifficulty.and(mask);
-			try {
-				if  (testDebug == 10801 || testDebug == 10843){
+			
+				if  (testDebug == 10801 || testDebug == 10842){
 				System.out.println("Difficulty change!");
 				System.out.println("targetTimespan" + BigInteger.valueOf(targetTimespan));
 				System.out.println("Received Difficulty: " + receivedDifficulty);
 				System.out.println("New Difficulty: " + newDifficulty);
-					if (storedPrev.getHeight() < 10702)
-						Thread.sleep(1);
-				}
-			} catch(InterruptedException ex) {
-						Thread.currentThread().interrupt();
 			}
 			
             if (newDifficulty.compareTo(receivedDifficulty) != 0){
-				System.out.println("Code's fucked! newDifficulty.compareTo(receivedDifficulty) != 0");
+				System.out.println("New Difficulty: " + newDifficulty);
+				System.out.println("Received Difficulty: " + receivedDifficulty);
+				System.out.println("Code's fucked! newDifficulty.compareTo(receivedDifficulty) != 0 at height" + testDebug);
                 throw new VerificationException("Network provided difficulty bits do not match what was calculated: " +
                         receivedDifficulty.toString(16) + " vs " + newDifficulty.toString(16));
 			}

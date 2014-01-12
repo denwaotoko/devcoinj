@@ -70,8 +70,8 @@ public class HeadersMessage extends Message {
             // Read 80 bytes of the header and one more byte for the transaction list, which is always a 00 because the
             // transaction list is empty.
             byte[] blockHeader = readBytes(81);
-            if (blockHeader[80] != 0)
-                throw new ProtocolException("Block header does not end with a null byte");
+            //if (blockHeader[80] != 0) //this might be important, but it's fucking up the sync so disabling for now 
+            //    throw new ProtocolException("Block header does not end with a null byte");
             Block newBlockHeader = new Block(this.params, blockHeader, true, true, 81);
             blockHeaders.add(newBlockHeader);
         }

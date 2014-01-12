@@ -27,7 +27,7 @@ public class BuildCheckpoints {
     public static void main(String[] args) throws Exception {
         BriefLogFormatter.init();
         final NetworkParameters params = MainNetParams.get();
-
+		System.out.println("Does this thing even work?");
         // Sorted map of UNIX time of block to StoredBlock object.
         final TreeMap<Integer, StoredBlock> checkpoints = new TreeMap<Integer, StoredBlock>();
 
@@ -65,7 +65,7 @@ public class BuildCheckpoints {
         final DigestOutputStream digestOutputStream = new DigestOutputStream(fileOutputStream, digest);
         digestOutputStream.on(false);
         final DataOutputStream dataOutputStream = new DataOutputStream(digestOutputStream);
-        dataOutputStream.writeBytes("CHECKPOINTS 1");
+        dataOutputStream.writeBytes("CHECKPOINTS");
         dataOutputStream.writeInt(0);  // Number of signatures to read. Do this later.
         digestOutputStream.on(true);
         dataOutputStream.writeInt(checkpoints.size());
@@ -87,7 +87,7 @@ public class BuildCheckpoints {
         // Sanity check the created file.
         CheckpointManager manager = new CheckpointManager(params, new FileInputStream("checkpoints"));
         checkState(manager.numCheckpoints() == checkpoints.size());
-        StoredBlock test = manager.getCheckpointBefore(1389223482);  // Just after block 200,000
+        StoredBlock test = manager.getCheckpointBefore(1389223482);  // Just after block 120,000
         checkState(test.getHeight() == 120000);
         checkState(test.getHeader().getHashAsString().equals("f6b5cff7fb9021908c1570d44aa63d3c64452250abd8d1088715ee84c3750639"));
 		
